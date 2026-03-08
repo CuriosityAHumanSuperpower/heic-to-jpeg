@@ -6,13 +6,14 @@ Converts all HEIC files from an input folder to JPEG files in an output folder.
 
 import os
 import sys
+import argparse
 from pathlib import Path
 from PIL import Image
 import pillow_heif
 
-def register_heic_opener():
-    """Register HEIC opener with Pillow."""
-    pillow_heif.register_heic_opener()
+def register_heif_opener():
+    """Register HEIF opener with Pillow."""
+    pillow_heif.register_heif_opener()
 
 def convert_heic_to_jpeg(input_folder, output_folder, quality=95):
     """
@@ -22,6 +23,8 @@ def convert_heic_to_jpeg(input_folder, output_folder, quality=95):
         input_folder (str): Path to folder containing HEIC images
         output_folder (str): Path to folder where JPEG images will be saved
         quality (int): JPEG quality (1-100, default 95)
+
+    Example : python convert_heic_to_jpeg.py --input_folder "C:\Users\alexa\Desktop\photos" --output_folder "C:\Users\alexa\Desktop\photos\heic-converted-to-jpeg"   
     """
     input_path = Path(input_folder).resolve()
     output_path = Path(output_folder).resolve()
@@ -89,25 +92,23 @@ def convert_heic_to_jpeg(input_folder, output_folder, quality=95):
 
 def main():
     """Main entry point."""
-    # Default paths
-    default_input = "."
-    default_output = "./heic-converted-to-jpeg"
+    parser = argparse.ArgumentParser(description="Convert HEIC images to JPEG format.")
+    parser.add_argument('-i', '--input_folder', default='.', help='Path to folder containing HEIC images')
+    parser.add_argument('-o', '--output_folder', default='./heic-converted-to-jpeg', help='Path to folder where JPEG images will be saved')
+    parser.add_argument('-q', '--quality', type=int, default=95, help='JPEG quality (1-100)')
     
-    # Parse command line arguments
-    input_folder = sys.argv[1] if len(sys.argv) > 1 else default_input
-    output_folder = sys.argv[2] if len(sys.argv) > 2 else default_output
-    quality = int(sys.argv[3]) if len(sys.argv) > 3 else 95
+    args = parser.parse_args()
     
     # Validate quality parameter
-    if not 1 <= quality <= 100:
+    if not 1 <= args.quality <= 100:
         print("Error: Quality must be between 1 and 100")
         sys.exit(1)
     
-    # Register HEIC opener
-    register_heic_opener()
+    # Register HEIF opener
+    register_heif_opener()
     
     # Convert images
-    success = convert_heic_to_jpeg(input_folder, output_folder, quality)
+    success = convert_heic_to_jpeg(args.input_folder, args.output_folder, args.quality)
     
     sys.exit(0 if success else 1)
 
